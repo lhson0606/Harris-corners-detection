@@ -18,7 +18,7 @@ void core::TestOpencv()
 	cv::waitKey(0); // Wait for a key press indefinitely
 }
 
-void core::HarrisCornerDetection(const cv::Mat& image, int blockSize, int ksize, double k)
+cv::Mat core::HarrisCornerDetection(const cv::Mat& image, int blockSize, int ksize, double k)
 {
 	// ref (implementation): https://docs.nvidia.com/vpi/algo_harris_corners.html
 	// ref (explanation): https://www.youtube.com/watch?v=Z_HwkG90Yvw
@@ -40,10 +40,11 @@ void core::HarrisCornerDetection(const cv::Mat& image, int blockSize, int ksize,
 	// Step 5: Non-max supppression
 	NonMaxSuppression(harrisResponse);
 
-	Display32FC1(harrisResponse, "Harris response");
+	// Display32FC1(harrisResponse, "Harris response");
 
 	VisualizeHarrisCorners(harrisVisual, harrisResponse);
-	cv::imshow("Harris Corners", harrisVisual);
+	
+	return harrisVisual;
 }
 
 cv::Mat core::ComputeHarrisResponse(const cv::Mat& Ix, const cv::Mat& Iy, int blockSize, double k)
@@ -179,14 +180,15 @@ void core::Handle(const std::string& cmd, char** args)
 			PrintErrorMessage("Could not open or find the image!");
 			return;
 		}
-		HarrisCornerDetection(image, 5, 5, 0.04);
+		cv::Mat res = HarrisCornerDetection(image, 5, 5, 0.04);
+		const std::string savePath = config::OUTPUT_DIR + args[3];
+		cv::imwrite(savePath, res);
+		PrintMessage("Harris corner detection completed. Result saved to " + savePath);
 	}
 	else
 	{
 		PrintErrorMessage("Unknown command");
 	}
-
-	cv::waitKey(0); // Wait for a key press indefinitely
 }
 
 void core::ComputeSobelGradientsSize5(const cv::Mat& image, cv::Mat& Ix, cv::Mat& Iy)

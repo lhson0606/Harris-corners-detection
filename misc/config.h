@@ -5,6 +5,7 @@ namespace config
 {
 	static const std::string kHarris = "-harris";
 	static const std::string INPUT_DIR = "Data/input/";
+	static const std::string OUTPUT_DIR = "Data/output/";
 
 	// Pixel values
 	static const int MAX_PIXEL_VALUE = 255;
