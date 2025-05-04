@@ -96,9 +96,9 @@ namespace core
 	/**  
 	 * @brief Apply a threshold to an image.  
 	 * @param image Input image (modified in-place).  
-	 * @param threshold Threshold value (default is 1e9).  
+	 * @param threshold Threshold value (default is 1e6).  
 	 */  
-	void ApplyThreshold(cv::Mat& image, float threshold = 1000000000.f);  
+	void ApplyThreshold(cv::Mat& image, float threshold = 1e6);  
 
 	/**  
 	 * @brief Perform non-maximum suppression on an image.  

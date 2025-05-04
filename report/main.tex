@@ -142,11 +142,23 @@ Thuật toán phát hiện góc Harris \cite{nvidia_harris} bao gồm các bư�
         \end{itemize}
         Giá trị $R$ sẽ cho biết mức độ góc tại pixel p. Nếu $R$ lớn hơn một ngưỡng nhất định, pixel p sẽ được coi là một góc.
     
-    \item Áp dụng ngưỡng để lọc các điểm ảnh có giá trị Harris lớn hơn một ngưỡng nhất định. Các điểm này sẽ được coi là các góc trong ảnh.
+    \item Áp dụng ngưỡng để lọc các điểm ảnh có giá trị Harris lớn hơn một ngưỡng nhất định. Các điểm này sẽ được coi là các góc trong ảnh.\\
+    Ở đây, chúng tôi sử dụng ngưỡng thresholdStrength = 1e6, tức là chỉ giữ lại các điểm ảnh có giá trị Harris lớn hơn 1 triệu.
     
-    \item Áp dụng thuật toán không cực trị (non-maximum suppression) để loại bỏ các điểm ảnh không phải là cực trị trong vùng lân cận của chúng. Điều này giúp giữ lại chỉ các điểm ảnh có giá trị Harris lớn nhất trong vùng lân cận.\\
-        Việc này sẽ chia ảnh các ô lưỡi 2D, chọn các ô có giá trị lớn nhất trong mỗi ô lưới 2D.\\
-        Nếu có nhiều hơn một điểm ảnh có giá trị Harris lớn nhất trong một ô lưới 2D, chỉ giữ lại điểm ảnh dưới cùng bên phải\\
+    \item Áp dụng thuật toán không cực trị (non-maximum suppression) để loại bỏ các điểm ảnh không phải là cực trị trong vùng lân cận của chúng. Điều này giúp giữ lại chỉ các điểm ảnh có giá trị Harris lớn nhất trong vùng lân cận.
+    \begin{itemize}
+        \item Tạo một bản sao của ảnh kết quả để lưu trữ kết quả xử lý.
+        \item Với mỗi pixel tại tọa độ $(x,y)$ trong ảnh (trừ các pixel biên):
+        \begin{itemize}
+            \item So sánh giá trị của pixel hiện tại với tất cả các pixel lân cận trong cửa sổ có kích thước $\text{windowSize} \times \text{windowSize}$ xung quanh nó.
+            \item Nếu có bất kỳ pixel lân cận nào có giá trị lớn hơn pixel hiện tại, đặt giá trị pixel hiện tại trong ảnh kết quả thành 0.
+            \item Nếu pixel hiện tại có giá trị lớn nhất trong vùng lân cận, giữ nguyên giá trị của nó.
+        \end{itemize}
+        \item Thay thế ảnh ban đầu bằng ảnh kết quả đã xử lý.
+    \end{itemize}
+    Kết quả cuối cùng là một tập các điểm có giá trị khác 0, đại diện cho các góc trong ảnh. Các điểm này là các cực đại cục bộ trong không gian đáp ứng Harris, đảm bảo rằng chỉ có các góc "mạnh" nhất được phát hiện và không có nhiều điểm góc được phát hiện gần nhau.\\
+    Ở đây chúng thôi sử dụng kích thước cửa sổ là 5x5, tức là $k$ = 5. Kích thước này được chọn để đảm bảo rằng các điểm ảnh trong vùng lân cận đủ lớn để phát hiện các góc mà không bị nhiễu bởi các chi tiết nhỏ trong ảnh.
+    \item Cuối cùng, vẽ các điểm góc đã phát hiện lên ảnh gốc. Các điểm này sẽ được đánh dấu bằng một màu sắc khác biệt (thường là màu xanh) để dễ dàng nhận diện.
 \end{enumerate}
 
 \subsection{Minh họa thuật toán}

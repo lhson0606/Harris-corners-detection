@@ -103,40 +103,35 @@ void core::ApplyThreshold(cv::Mat& image, float threshold)
 
 void core::NonMaxSuppression(cv::Mat& image, int windowSize)
 {
-	for (int i = 0; i < image.rows / windowSize; i++)
+	auto res = image.clone();
+	int halfWindowSize = windowSize / 2;
+	for (int y = halfWindowSize; y < image.rows - halfWindowSize; y++)
 	{
-		for (int j = 0; j < image.cols / windowSize; j++)
+		for (int x = halfWindowSize; x < image.cols - halfWindowSize; x++)
 		{
-			int y = (i + 1) * windowSize - 1;
-			int x = (j + 1) * windowSize - 1;
-			float maxVal = image.at<float>(y, x);
+			float center = image.at<float>(y, x);
+			bool isMax = true;
 
-			while (y >= j * windowSize && x >= i * windowSize)
+			for (int i = -halfWindowSize; i <= halfWindowSize && isMax; i++)
 			{
-				if (maxVal < image.at<float>(y, x))
+				for (int j = -halfWindowSize; j <= halfWindowSize; j++)
 				{
-					maxVal = image.at<float>(y, x);
+					if (i == 0 && j == 0)
+						continue;
+					float neighbor = image.at<float>(y + i, x + j);
+					if (neighbor > center)
+					{
+						isMax = false;
+						break;
+					}
 				}
-
-				y--;
-				x--;
 			}
 
-			y = (i + 1) * windowSize - 1;
-			x = (j + 1) * windowSize - 1;
-
-			while (y >= j * windowSize && x >= i * windowSize)
-			{
-				if (maxVal != image.at<float>(y, x))
-				{
-					image.at<float>(y, x) = 0;
-				}
-
-				y--;
-				x--;
-			}
+			res.at<float>(y, x) = isMax ? center : 0;
 		}
 	}
+
+	image = res.clone();
 }
 
 void core::VisualizeHarrisCorners(cv::Mat& image, const cv::Mat& harrisResponse)
@@ -184,6 +179,8 @@ void core::Handle(const std::string& cmd, char** args)
 		const std::string savePath = config::OUTPUT_DIR + args[3];
 		cv::imwrite(savePath, res);
 		PrintMessage("Harris corner detection completed. Result saved to " + savePath);
+		cv::imshow("Harris Corner Detection", res);
+		cv::waitKey(0); // Wait for a key press indefinitely
 	}
 	else
 	{
